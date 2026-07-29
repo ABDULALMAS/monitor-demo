@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Acme Analytics — Competitive Intelligence Without the Noise</title>
+<meta name="description" content="Acme Analytics tracks your competitors' pricing, product, and messaging changes in real time, and hands you a clean summary instead of a pile of screenshots." />
+
+<!-- ============ FONTS ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- ============ TAILWIND CDN ============ -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0B1220',
+          paper: '#F6F7FA',
+          signal: '#00C2A8',
+          indigo: {
+            signal: '#5B5FF0'
+          },
+          muted: '#5B6472'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace']
+        },
+        boxShadow: {
+          card: '0 1px 2px rgba(11,18,32,0.04), 0 8px 24px -8px rgba(11,18,32,0.10)',
+          'card-lg': '0 2px 4px rgba(11,18,32,0.04), 0 24px 48px -16px rgba(11,18,32,0.16)'
+        }
+      }
+    }
+  }
+</script>
+
+<!-- ============ CUSTOM STYLES (animations, fine details Tailwind can't express) ============ -->
+<style>
+  html { scroll-behavior: smooth; }
+  body { background-color: #F6F7FA; }
+
+  /* Signature element: scanning gradient sweep behind the hero feed card */
+  @keyframes scan-sweep {
+    0%   { transform: translateX(-30%); opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateX(130%); opacity: 0; }
+  }
+  .scan-line {
+    animation: scan-sweep 3.2s ease-in-out infinite;
+  }
+
+  /* Live pulse dot used on feed rows */
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,194,168,0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(0,194,168,0); }
+  }
+  .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  /* Feed rows drift in on load for a "streaming" feel */
+  @keyframes feed-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feed-row { animation: feed-in 0.6s ease-out both; }
+
+  /* Reduced motion: respect user preference */
+  @media (prefers-reduced-motion: reduce) {
+    .scan-line, .pulse-dot, .feed-row { animation: none !important; }
+  }
+
+  /* Accordion chevron rotation for native <details> FAQ */
+  details[open] .faq-chevron { transform: rotate(180deg); }
+  .faq-chevron { transition: transform 0.2s ease; }
+
+  /* Focus visibility (accessibility floor) */
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid #5B5FF0;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+
+<body class="font-body text-ink antialiased">
+
+<!-- ============ NAVBAR ============ -->
+<header class="sticky top-0 z-50 bg-paper/80 backdrop-blur-md border-b border-ink/5">
+  <nav class="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2 font-display font-semibold text-lg tracking-tight">
+      <span class="relative flex h-7 w-7 items-center justify-center rounded-md bg-ink">
+        <span class="h-2 w-2 rounded-full bg-signal pulse-dot"></span>
+      </span>
+      Acme Analytics
+    </a>
+
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-muted">
+      <a href="#features" class="hover:text-ink transition-colors">Features</a>
+      <a href="#pricing" class="hover:text-ink transition-colors">Pricing</a>
+      <a href="#testimonial" class="hover:text-ink transition-colors">Customers</a>
+      <a href="#faq" class="hover:text-ink transition-colors">FAQ</a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="#" class="hidden sm:inline-block text-sm font-medium text-muted hover:text-ink transition-colors">Sign in</a>
+      <a href="#cta" class="inline-flex items-center rounded-lg bg-ink text-white text-sm font-medium px-4 py-2 hover:bg-ink/90 transition-colors">Start Free</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO SECTION ============ -->
+  <section class="relative overflow-hidden">
+    <!-- ambient gradient backdrop -->
+    <div class="pointer-events-none absolute inset-x-0 -top-24 h-[520px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(91,95,240,0.12),rgba(0,194,168,0.08)_45%,rgba(246,247,250,0)_75%)]"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-24 lg:pt-28 lg:pb-32">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- copy -->
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/70 px-3 py-1 text-xs font-mono uppercase tracking-widest text-muted mb-6">
+            <span class="h-1.5 w-1.5 rounded-full bg-signal pulse-dot"></span>
+            Now monitoring 40,000+ domains
+          </div>
+
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.4rem] font-semibold tracking-tight leading-[1.08]">
+            Competitive Intelligence
+            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-signal to-signal">Without the Noise</span>
+          </h1>
+
+          <p class="mt-6 text-lg text-muted max-w-lg leading-relaxed">
+            Acme Analytics watches your competitors' pricing pages, product updates, and public messaging around the clock — then hands your team a clean, three-line summary instead of forty browser tabs.
+          </p>
+
+          <div class="mt-9 flex flex-col sm:flex-row gap-3">
+            <a href="#cta" class="inline-flex items-center justify-center gap-2 rounded-lg bg-ink text-white font-medium px-6 py-3.5 hover:bg-ink/90 transition-colors shadow-card">
+              Start Free
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.29 5.15a.75.75 0 1 1 1.02-1.1l5.5 5a.75.75 0 0 1 0 1.1l-5.5 5a.75.75 0 1 1-1.02-1.1l4.098-4.1H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            <a href="#" class="inline-flex items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white font-medium px-6 py-3.5 hover:border-ink/30 transition-colors">
+              Book Demo
+            </a>
+          </div>
+
+          <p class="mt-5 text-sm text-muted font-mono">No credit card required · 14-day full access</p>
+        </div>
+
+        <!-- signature element: live signal feed card -->
+        <div class="relative">
+          <div class="relative rounded-2xl border border-ink/10 bg-ink shadow-card-lg overflow-hidden">
+            <!-- scan sweep -->
+            <div class="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-signal/25 to-transparent scan-line"></div>
+
+            <!-- window chrome -->
+            <div class="relative flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
+              <span class="h-2.5 w-2.5 rounded-full bg-white/20"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-white/20"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-white/20"></span>
+              <span class="ml-3 font-mono text-xs text-white/40">live-feed.acme</span>
+            </div>
+
+            <!-- feed rows -->
+            <div class="relative p-4 space-y-2.5">
+              <div class="feed-row flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-3" style="animation-delay:0.05s">
+                <div class="flex items-center gap-3">
+                  <span class="h-2 w-2 rounded-full bg-signal pulse-dot"></span>
+                  <div>
+                    <p class="text-sm text-white font-medium">Northwind Co. dropped Pro tier by 12%</p>
+                    <p class="text-xs text-white/40 font-mono">pricing change · 2m ago</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-row flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-3" style="animation-delay:0.2s">
+                <div class="flex items-center gap-3">
+                  <span class="h-2 w-2 rounded-full bg-indigo-signal"></span>
+                  <div>
+                    <p class="text-sm text-white font-medium">Vantage Labs shipped "Bulk Export"</p>
+                    <p class="text-xs text-white/40 font-mono">product update · 19m ago</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-row flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-3" style="animation-delay:0.35s">
+                <div class="flex items-center gap-3">
+                  <span class="h-2 w-2 rounded-full bg-white/30"></span>
+                  <div>
+                    <p class="text-sm text-white font-medium">Fielday rewrote homepage headline</p>
+                    <p class="text-xs text-white/40 font-mono">messaging change · 41m ago</p>
+                  </div>
+                </div>
+              </div>
+              <div class="feed-row flex items-center justify-between rounded-lg bg-white/5 px-3.5 py-3" style="animation-delay:0.5s">
+                <div class="flex items-center gap-3">
+                  <span class="h-2 w-2 rounded-full bg-signal pulse-dot"></span>
+                  <div>
+                    <p class="text-sm text-white font-medium">Orbital added an Enterprise tier</p>
+                    <p class="text-xs text-white/40 font-mono">pricing change · 1h ago</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- floating summary chip -->
+          <div class="hidden sm:flex absolute -bottom-6 -left-6 items-center gap-3 rounded-xl bg-white border border-ink/10 shadow-card px-4 py-3 max-w-[220px]">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-signal/10 text-signal">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <p class="text-xs text-muted leading-snug">AI summary generated <span class="text-ink font-medium">every morning at 7am</span></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUSTED BY SECTION ============ -->
+  <section class="border-y border-ink/5 bg-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+      <p class="text-center text-xs font-mono uppercase tracking-widest text-muted mb-8">Trusted by product and growth teams at</p>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 items-center opacity-60">
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Northwind</div>
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Vantage</div>
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Fielday</div>
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Orbital</div>
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Kestrel</div>
+        <div class="flex justify-center font-display font-semibold text-lg text-ink/60">Hollow&amp;Co</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES SECTION ============ -->
+  <section id="features" class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+    <div class="max-w-2xl mb-16">
+      <p class="font-mono text-xs uppercase tracking-widest text-signal mb-3">// Features</p>
+      <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Everything you need to track the market, nothing you have to babysit</h2>
+      <p class="mt-4 text-muted text-lg leading-relaxed">Point Acme Analytics at a list of competitors and it takes care of the watching, the diffing, and the summarizing.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Feature: Competitor Monitoring -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-signal/10 text-indigo-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Competitor Monitoring</h3>
+        <p class="text-muted text-sm leading-relaxed">Track any number of competitor sites, apps, and social profiles from a single watchlist that updates itself.</p>
+      </div>
+
+      <!-- Feature: Pricing Alerts -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-signal/10 text-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Pricing Alerts</h3>
+        <p class="text-muted text-sm leading-relaxed">Get notified the moment a competitor changes a price, adds a tier, or quietly retires a plan.</p>
+      </div>
+
+      <!-- Feature: AI Summaries -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-signal/10 text-indigo-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">AI Summaries</h3>
+        <p class="text-muted text-sm leading-relaxed">Skip the raw diffs. Every change arrives as a plain-English summary of what happened and why it matters.</p>
+      </div>
+
+      <!-- Feature: Website Change Detection -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-signal/10 text-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c1.5-4.5 5.25-7.5 9.75-7.5s8.25 3 9.75 7.5c-1.5 4.5-5.25 7.5-9.75 7.5s-8.25-3-9.75-7.5Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Website Change Detection</h3>
+        <p class="text-muted text-sm leading-relaxed">Full-page diffing catches copy edits, new sections, and layout changes competitors hoped you'd miss.</p>
+      </div>
+
+      <!-- Feature: Team Collaboration -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-signal/10 text-indigo-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Team Collaboration</h3>
+        <p class="text-muted text-sm leading-relaxed">Tag teammates on any alert, leave notes for context, and keep everyone working from the same feed.</p>
+      </div>
+
+      <!-- Feature: Slack Notifications -->
+      <div class="group rounded-2xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-card-lg hover:-translate-y-0.5 transition-all">
+        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-signal/10 text-signal mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M18 15h.008v.008H18V15Zm-12 3h12a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3Z" />
+          </svg>
+        </div>
+        <h3 class="font-display font-semibold text-lg mb-2">Slack Notifications</h3>
+        <p class="text-muted text-sm leading-relaxed">Route alerts straight to the channels your team already lives in — no dashboard-checking required.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PRICING SECTION ============ -->
+  <section id="pricing" class="bg-white border-y border-ink/5">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+      <div class="max-w-2xl mx-auto text-center mb-16">
+        <p class="font-mono text-xs uppercase tracking-widest text-signal mb-3">// Pricing</p>
+        <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Simple pricing that scales with your watchlist</h2>
+        <p class="mt-4 text-muted text-lg leading-relaxed">Start free, upgrade when you're tracking more competitors than you can check by hand.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+
+        <!-- Plan: Starter -->
+        <div class="rounded-2xl border border-ink/10 bg-paper p-8 shadow-card">
+          <h3 class="font-display font-semibold text-lg">Starter</h3>
+          <p class="mt-2 text-sm text-muted">For solo founders keeping an eye on the field.</p>
+          <p class="mt-6 flex items-baseline gap-1">
+            <span class="font-display text-4xl font-semibold tracking-tight">$19</span>
+            <span class="text-muted font-mono text-sm">/month</span>
+          </p>
+          <a href="#cta" class="mt-6 block text-center rounded-lg border border-ink/15 bg-white font-medium px-5 py-3 hover:border-ink/30 transition-colors">Start Free</a>
+          <ul class="mt-8 space-y-3 text-sm">
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Up to 5 tracked competitors</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Daily change alerts</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Pricing page monitoring</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Email notifications</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>1 seat</span></li>
+          </ul>
+        </div>
+
+        <!-- Plan: Pro (Most Popular) -->
+        <div class="relative rounded-2xl border-2 border-ink bg-ink text-white p-8 shadow-card-lg lg:-translate-y-3">
+          <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-signal text-ink text-xs font-mono font-medium uppercase tracking-wide px-3 py-1">Most Popular</span>
+          <h3 class="font-display font-semibold text-lg">Pro</h3>
+          <p class="mt-2 text-sm text-white/60">For teams who act on what they track.</p>
+          <p class="mt-6 flex items-baseline gap-1">
+            <span class="font-display text-4xl font-semibold tracking-tight">$49</span>
+            <span class="text-white/50 font-mono text-sm">/month</span>
+          </p>
+          <a href="#cta" class="mt-6 block text-center rounded-lg bg-signal text-ink font-medium px-5 py-3 hover:bg-signal/90 transition-colors">Start Free</a>
+          <ul class="mt-8 space-y-3 text-sm">
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Up to 30 tracked competitors</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Real-time alerts</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>AI-generated daily summaries</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Slack &amp; Teams integration</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Up to 10 seats</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Shared team feed</span></li>
+          </ul>
+        </div>
+
+        <!-- Plan: Enterprise -->
+        <div class="rounded-2xl border border-ink/10 bg-paper p-8 shadow-card">
+          <h3 class="font-display font-semibold text-lg">Enterprise</h3>
+          <p class="mt-2 text-sm text-muted">For orgs with dedicated competitive intel functions.</p>
+          <p class="mt-6 flex items-baseline gap-1">
+            <span class="font-display text-4xl font-semibold tracking-tight">Custom</span>
+          </p>
+          <a href="#cta" class="mt-6 block text-center rounded-lg border border-ink/15 bg-white font-medium px-5 py-3 hover:border-ink/30 transition-colors">Contact Sales</a>
+          <ul class="mt-8 space-y-3 text-sm">
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Unlimited tracked competitors</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Custom data retention</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>SSO &amp; SCIM provisioning</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Dedicated onboarding &amp; CSM</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>99.9% uptime SLA</span></li>
+            <li class="flex items-start gap-2.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-signal shrink-0"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg><span>Unlimited seats</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIAL SECTION ============ -->
+  <section id="testimonial" class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+    <div class="max-w-3xl mx-auto text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 mx-auto text-signal/40 mb-6">
+        <path d="M7.17 6.17A5.001 5.001 0 0 0 4 11v7h6v-7H6.5c0-1.38.62-2.19 1.67-3.02L7.17 6.17ZM17.17 6.17A5.001 5.001 0 0 0 14 11v7h6v-7h-3.5c0-1.38.62-2.19 1.67-3.02l-1-1.81Z" />
+      </svg>
+      <p class="font-display text-2xl sm:text-3xl font-medium leading-snug tracking-tight">
+        "We used to lose a full afternoon every Monday just checking competitor pricing pages by hand. Acme Analytics turned that into a five-minute read over coffee."
+      </p>
+      <div class="mt-8 flex items-center justify-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-signal/10 font-display font-semibold text-indigo-signal">MK</div>
+        <div class="text-left">
+          <p class="font-medium text-sm">Maren Kessler</p>
+          <p class="text-muted text-sm">Head of Product Marketing, Vantage Labs</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ SECTION ============ -->
+  <section id="faq" class="bg-white border-y border-ink/5">
+    <div class="max-w-3xl mx-auto px-6 lg:px-8 py-24 lg:py-28">
+      <div class="mb-14">
+        <p class="font-mono text-xs uppercase tracking-widest text-signal mb-3">// FAQ</p>
+        <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight">Questions, answered</h2>
+      </div>
+
+      <div class="space-y-3">
+        <details class="group rounded-xl border border-ink/10 bg-paper px-6 py-5 open:shadow-card">
+          <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+            How does Acme Analytics track a competitor's website?
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="faq-chevron w-5 h-5 text-muted shrink-0"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">You give us a URL, and our crawlers check it on a schedule you control, from once an hour to once a day. Any meaningful change to pricing, copy, or layout is flagged automatically.</p>
+        </details>
+
+        <details class="group rounded-xl border border-ink/10 bg-paper px-6 py-5 open:shadow-card">
+          <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+            Can I try Acme Analytics before paying?
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="faq-chevron w-5 h-5 text-muted shrink-0"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">Yes. Every plan starts with a 14-day trial with full feature access and no credit card required. You can add your first competitors in under two minutes.</p>
+        </details>
+
+        <details class="group rounded-xl border border-ink/10 bg-paper px-6 py-5 open:shadow-card">
+          <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+            What happens if I go over my plan's competitor limit?
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="faq-chevron w-5 h-5 text-muted shrink-0"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">We'll let you know as you approach your limit and pause new additions rather than cutting off existing tracking. Upgrading takes effect immediately and prorates automatically.</p>
+        </details>
+
+        <details class="group rounded-xl border border-ink/10 bg-paper px-6 py-5 open:shadow-card">
+          <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+            Does Acme Analytics integrate with Slack?
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="faq-chevron w-5 h-5 text-muted shrink-0"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">Yes, along with Microsoft Teams and email. You can route different alert types to different channels, so pricing changes and messaging changes don't have to land in the same place.</p>
+        </details>
+
+        <details class="group rounded-xl border border-ink/10 bg-paper px-6 py-5 open:shadow-card">
+          <summary class="flex items-center justify-between cursor-pointer list-none font-medium">
+            Can I cancel anytime?
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="faq-chevron w-5 h-5 text-muted shrink-0"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">Yes, from your account settings with no cancellation fee. You'll keep access through the end of your current billing period.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA SECTION ============ -->
+  <section id="cta" class="relative overflow-hidden bg-ink">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_80%_at_50%_100%,rgba(0,194,168,0.18),rgba(11,18,32,0)_70%)]"></div>
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-8 py-24 text-center">
+      <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-white">Stop refreshing competitor websites</h2>
+      <p class="mt-4 text-white/60 text-lg max-w-xl mx-auto">Set up your first watchlist in under two minutes and see your first summary tomorrow morning.</p>
+      <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="#" class="inline-flex items-center justify-center gap-2 rounded-lg bg-signal text-ink font-medium px-6 py-3.5 hover:bg-signal/90 transition-colors w-full sm:w-auto">Start Free</a>
+        <a href="#" class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 text-white font-medium px-6 py-3.5 hover:border-white/40 transition-colors w-full sm:w-auto">Book Demo</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-ink border-t border-white/10">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-10">
+
+      <div class="lg:col-span-2">
+        <a href="#top" class="flex items-center gap-2 font-display font-semibold text-lg text-white">
+          <span class="relative flex h-7 w-7 items-center justify-center rounded-md bg-white/10">
+            <span class="h-2 w-2 rounded-full bg-signal"></span>
+          </span>
+          Acme Analytics
+        </a>
+        <p class="mt-4 text-sm text-white/50 max-w-xs leading-relaxed">Competitive intelligence for product, marketing, and growth teams who'd rather build than browse.</p>
+      </div>
+
+      <div>
+        <p class="text-xs font-mono uppercase tracking-widest text-white/40 mb-4">Product</p>
+        <ul class="space-y-2.5 text-sm text-white/60">
+          <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+          <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Changelog</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Integrations</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-xs font-mono uppercase tracking-widest text-white/40 mb-4">Company</p>
+        <ul class="space-y-2.5 text-sm text-white/60">
+          <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="text-xs font-mono uppercase tracking-widest text-white/40 mb-4">Legal</p>
+        <ul class="space-y-2.5 text-sm text-white/60">
+          <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">Security</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-xs text-white/40">&copy; 2026 Acme Analytics, Inc. All rights reserved.</p>
+      <div class="flex items-center gap-4 text-white/40">
+        <a href="#" aria-label="Twitter / X" class="hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.451-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644Z"/></svg>
+        </a>
+        <a href="#" aria-label="LinkedIn" class="hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.446-2.136 2.94v5.666H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.114 20.452H3.558V9h3.556v11.452z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
