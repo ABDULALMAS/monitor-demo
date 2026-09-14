@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Analytics — Pricing</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-950 text-white">
+  <nav class="border-b border-slate-800 px-8 py-5">
+    <div class="max-w-6xl mx-auto flex gap-6">
+      <a href="index.html">Home</a>
+      <a href="features.html">Features</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-8 py-20">
+    <h1 class="text-4xl font-bold mb-12">Pricing</h1>
+
+    <!-- Pricing is intentionally empty in the initial HTML -->
+    <div id="pricing" class="grid md:grid-cols-3 gap-8"></div>
+  </main>
+
+  <script>
+    const plans = [
+      {
+        name: "Starter",
+        price: "$19/month",
+        description: "For individuals monitoring a few competitors."
+      },
+      {
+        name: "Growth",
+        price: "$79/month",
+        description: "For teams tracking their competitive landscape."
+      },
+      {
+        name: "Enterprise",
+        price: "$149/month",
+        description: "For organizations needing advanced monitoring."
+      }
+    ];
+
+    const pricing = document.getElementById("pricing");
+
+    pricing.innerHTML = plans.map(plan => `
+      <div class="border border-slate-700 rounded-xl p-8">
+        <h2 class="text-2xl font-semibold">${plan.name}</h2>
+        <p class="text-3xl font-bold mt-4">${plan.price}</p>
+        <p class="text-slate-400 mt-4">${plan.description}</p>
+      </div>
+    `).join("");
+  </script>
+</body>
+</html>
